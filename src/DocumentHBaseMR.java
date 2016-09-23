@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
+import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -19,7 +20,7 @@ public class DocumentHBaseMR {
 	
 	public static class MapperClass extends Mapper<LongWritable,Text,ImmutableBytesWritable,Put>{
 		
-		public static final String[] columns={"url","media_doc_id","category","context"};
+		public static final String[] columns={"media_doc_id","context"};
 		
 		public void map(LongWritable key,Text value,Context context) 
 				throws IOException, InterruptedException{
@@ -37,40 +38,31 @@ public class DocumentHBaseMR {
 	
 	public static void main(String[] args) 
 			throws IOException, ClassNotFoundException, InterruptedException{
-		Configuration conf = null; 
-        conf=HBaseConfiguration.create();
-        
-        String[] libjarsArr = args[1].split(",");
-        for (int i = 0; i < libjarsArr.length; ++i) {
-        	addTmpJar(libjarsArr[i], conf);
-        }
-        
-		conf.set("conf.column", "info");
-		Job job =new Job(conf,"DocumentHBaseMR");		
-		job.setJarByClass(DocumentHBaseMR.class);
-		
-		job.setMapperClass(Mapper.class);		
-		job.setOutputFormatClass(TableOutputFormat.class);
-		job.getConfiguration().set(TableOutputFormat.OUTPUT_TABLE,"IndiaTable");
-		
-		job.setMapOutputKeyClass(ImmutableBytesWritable.class);
-		job.setMapOutputValueClass(LongWritable.class);
-		
-		job.setNumReduceTasks(0);
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		 System.out.println(job.waitForCompletion(true) ? 0 : 1);
-	}
-	
-	public static void addTmpJar(String jarPath, Configuration conf) throws IOException {
-		System.setProperty("path.separator", ":");
-		FileSystem fs = FileSystem.getLocal(conf);
-		String newJarPath = new Path(jarPath).makeQualified(fs).toString();
-		String tmpjars = conf.get("tmpjars");
-		if (tmpjars == null || tmpjars.length() == 0) {
-			conf.set("tmpjars", newJarPath);
-		} else {
-			conf.set("tmpjars", tmpjars + "," + newJarPath);
-		}
+
+			Configuration conf=HBaseConfiguration.create();
+	     
+			conf.set("conf.column", "info");
+			
+			conf.set("hbase.zookeeper.property.clientPort", "31818");
+	        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");  
+	        conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
+	        
+	        conf.set(TableOutputFormat.OUTPUT_TABLE, "IndiaTable");
+			
+			
+			Job job =new Job(conf,"DocumentHBaseMR");
+			TableMapReduceUtil.addDependencyJars(job);		
+					
+			job.setJarByClass(DocumentHBaseMR.class);		
+			job.setMapperClass(MapperClass.class);		
+			job.setOutputFormatClass(TableOutputFormat.class);	
+			job.setMapOutputKeyClass(ImmutableBytesWritable.class);
+			job.setMapOutputValueClass(LongWritable.class);
+			
+			job.setNumReduceTasks(0);
+			FileInputFormat.addInputPath(job, new Path(args[0]));
+			System.out.println(job.waitForCompletion(true) ? 0 : 1);
+
 	}
 
 }
