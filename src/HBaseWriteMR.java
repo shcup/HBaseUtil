@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Result;
@@ -20,15 +21,20 @@ import DocProcess.CompositeDocSerialize;
 import pipeline.CompositeDoc;
 
 public class HBaseWriteMR {
+
 	
+
 public static class HBaseToHdfsMapper extends TableMapper<Text,Text>{
 	private Text outKey= new Text();
 	private Text outValue=new Text();
+	
+	//public static int fresh_limit = 0;
 	
 	protected void map(ImmutableBytesWritable key,Result value,Context context) throws IOException, InterruptedException{
 		//key is mean to rowkey
 		byte[] media_doc_id=null;
 		byte[] text=null;
+		int fresh_limit = Integer.parseInt(context.getConfiguration().get("Fresh_limit"));
 		
 		media_doc_id=value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()).getValue();
 		text=value.getColumnLatestCell("info".getBytes(),"context".getBytes()).getValue();
@@ -38,26 +44,35 @@ public static class HBaseToHdfsMapper extends TableMapper<Text,Text>{
 		String temp=(text == null || text.length==0)?"Null":new String(text);
 		System.out.println(temp);		
 		
-		Date currentTime = new Date();// 当前时间
 		DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(temp, context);
-		long dt=compositeDoc.media_doc_info.update_timestamp;
-		long dt1=dt-currentTime.getTime();
 		
-		if(dt1< 2 * 24* 3600){
-			String str=compositeDoc.toString();
-			outValue.set(str);
-		}		
-		context.write(outKey, outValue);
+		long freshness = System.currentTimeMillis()/1000 - compositeDoc.media_doc_info.update_timestamp;
+		/*outValue.set(String.valueOf(freshness) +
+			" " + String.valueOf(fresh_limit * 24 * 3600));
+		context.write(outKey, outValue);*/
+		if(freshness < fresh_limit * 24 * 3600){
+			outValue.set(CompositeDocSerialize.Serialize(compositeDoc, context));
+			context.write(outKey, outValue);
+		}
+		
 	
 	}
 }
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+
 		// TODO Auto-generated method stub
 		Configuration conf=HBaseConfiguration.create();
 		conf.set("hbase.zookeeper.property.clientPort", "31818");
-        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");  
+        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");   
         conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
+        
+        conf.set("Fresh_limit", args[2]);
+        
+        String[] libjarsArr = args[3].split(",");
+        for (int i = 0; i < libjarsArr.length; ++i) {
+        	addTmpJar(libjarsArr[i], conf);
+        }
 
 		Job job=Job.getInstance(conf,HBaseWriteMR.class.getSimpleName());
 		job.setJarByClass(HBaseWriteMR.class);
@@ -74,6 +89,18 @@ public static class HBaseToHdfsMapper extends TableMapper<Text,Text>{
 		
 		job.waitForCompletion(true);
 
+	}
+	
+	public static void addTmpJar(String jarPath, Configuration conf) throws IOException {
+		System.setProperty("path.separator", ":");
+		FileSystem fs = FileSystem.getLocal(conf);
+		String newJarPath = new Path(jarPath).makeQualified(fs).toString();
+		String tmpjars = conf.get("tmpjars");
+		if (tmpjars == null || tmpjars.length() == 0) {
+			conf.set("tmpjars", newJarPath);
+		} else {
+			conf.set("tmpjars", tmpjars + "," + newJarPath);
+		}
 	}
 
 }
