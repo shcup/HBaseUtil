@@ -21,11 +21,6 @@ public class LocalHBase {
 		conf.set("conf.column", "info");
 		conf.set("hbase.zookeeper.property.clientPort", "31818");   
 		
-		   String[] libjarsArr = args[2].split(",");
-	        for (int i = 0; i < libjarsArr.length; ++i) {
-	        	addTmpJar(libjarsArr[i], conf);
-	        }
-		
         HTable table=new HTable(conf,"Localltable");
 		
 		byte[] row = Bytes.toBytes("1");
@@ -36,16 +31,4 @@ public class LocalHBase {
 			table.flushCommits();
 
 		}
-	public static void addTmpJar(String jarPath, Configuration conf) throws IOException {
-		System.setProperty("path.separator", ":");
-		FileSystem fs = FileSystem.getLocal(conf);
-		String newJarPath = new Path(jarPath).makeQualified(fs).toString();
-		String tmpjars = conf.get("tmpjars");
-		if (tmpjars == null || tmpjars.length() == 0) {
-			conf.set("tmpjars", newJarPath);
-		} else {
-			conf.set("tmpjars", tmpjars + "," + newJarPath);
-		}
-	}
-	
 }

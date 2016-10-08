@@ -17,5 +17,7 @@
 	<classpathentry kind="lib" path="E:/NLPMR/hadoop-mapreduce-client-common-2.6.0.jar"/>
 	<classpathentry kind="lib" path="E:/NLPMR/hadoop-mapreduce-client-core-2.6.0.jar" sourcepath="E:/NLPMR/hadoop-mapreduce-client-core-2.6.0.jar"/>
 	<classpathentry kind="lib" path="E:/NLPMR/hadoop-yarn-common-2.6.0.jar"/>
+	<classpathentry kind="lib" path="E:/NLPMR/HadoopCompositeDoc.jar" sourcepath="E:/NLPMR/libthrift-0.9.3.jar"/>
+	<classpathentry kind="lib" path="E:/NLPMR/libthrift-0.9.3.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
