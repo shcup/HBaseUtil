@@ -28,13 +28,18 @@ public static class HBaseToHdfsMapper extends TableMapper<Text,Text>{
 	private Text outKey= new Text();
 	private Text outValue=new Text();
 	
-	//public static int fresh_limit = 0;
+	private int fresh_limit = 0;
+	
+	  protected void setup(Context context)  
+	          throws IOException, InterruptedException { 
+		  fresh_limit = Integer.parseInt(context.getConfiguration().get("Fresh_limit"));
+	  }
 	
 	protected void map(ImmutableBytesWritable key,Result value,Context context) throws IOException, InterruptedException{
 		//key is mean to rowkey
 		byte[] media_doc_id=null;
 		byte[] text=null;
-		int fresh_limit = Integer.parseInt(context.getConfiguration().get("Fresh_limit"));
+		
 		
 		media_doc_id=value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()).getValue();
 		text=value.getColumnLatestCell("info".getBytes(),"context".getBytes()).getValue();
