@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 public class HBaseHashInPut {
@@ -19,14 +20,20 @@ public class HBaseHashInPut {
 		
 		public static final String[] columns={"media_doc_id","hash"};
 		
+		public String[] column_name = null;
+		
+		public void setup(Context context) {	
+			column_name = context.getConfiguration().get("column_name").split(",");
+		}
+		
 		public void map(LongWritable key,Text value,Context context) 
 				throws IOException, InterruptedException{
 			
 			String[] columnVals=value.toString().split("\t");
 			String rowkey=columnVals[0];
 			Put put=new Put(rowkey.getBytes());
-			for(int i=0;i<columnVals.length;i++){
-				put.add("info".getBytes(),columns[i].getBytes(),columnVals[i].getBytes());
+			for(int i=1 ; i<columnVals.length ; i++){
+				put.add("info".getBytes(), column_name[i].getBytes(), columnVals[i].getBytes());
 			}
 			context.write(new ImmutableBytesWritable(rowkey.getBytes()), put);
 		}			
@@ -44,7 +51,9 @@ public class HBaseHashInPut {
 	        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");  
 	        conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
 	        
-	        conf.set(TableOutputFormat.OUTPUT_TABLE, "HashFilter");					
+	        conf.set("column_name", args[2]);
+	        
+	        conf.set(TableOutputFormat.OUTPUT_TABLE, args[1]);					
 			Job job =new Job(conf,"HBaseHashInPut");
 			TableMapReduceUtil.addDependencyJars(job);		
 					

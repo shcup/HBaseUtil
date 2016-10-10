@@ -3,44 +3,78 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
+import javax.sound.midi.Sequence;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileAsTextInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.ReflectionUtils;
+
+//import org.apache.hcatalog.rcfile.RCFileMapReduceInputFormat;
+//import org.apache.hive.hcatalog.rcfile.RCFileMapReduceInputFormat;
+
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 public class DocumentFilterMR {
-	
-	public static class MapperClass extends Mapper<Object, Text, Text, Text>{
+    private static SequenceFile.Reader reader = null;  
+    private static Configuration conf = new Configuration();  
+    
+	public static class MapperClass extends Mapper<Text , Text, Text, Text>{
 		
-//		public static final String[] columns={"media_doc_id","hash"};
-		
+//		public static final String[] columns={"media_doc_id","hash"};	
 		private HashMap<String, String> hashMap=new HashMap<String,String>();
 		private MessageDigest md;
 		
-		public void setup(Text value,Context context) throws NoSuchAlgorithmException, IOException{		
-			md= MessageDigest.getInstance("MD5");	
-			File file=new File(context.getConfiguration().get("IDList.txt"));
-			BufferedReader br=new BufferedReader (new InputStreamReader(new FileInputStream(file)));
-			String line=null;
-			while((line = br.readLine()) != null) {
-				String[] text=line.split("\t");
-				hashMap.put(text[0],text[1]);
+		protected void setup(Context context)
+                throws IOException, InterruptedException {
+	        String dsf = context.getConfiguration().get("HDFS_hashlist");  
+	        Configuration conf = new Configuration();      
+	        FileSystem fs = FileSystem.get(URI.create(dsf),conf);  
+	        FSDataInputStream hdfsInStream = fs.open(new Path(dsf));  
+	             
+	        String line;
+	        while((line = hdfsInStream.readLine()) != null) {
+	        	String[] items = line.split("\t");
+	        	hashMap.put(items[0], items[1]);
+	        	context.getCounter("custom", "hash_list_count").increment(1);
+	        }
+	        hdfsInStream.close();  
+	        fs.close(); 
+	        
+	        try {
+				md = MessageDigest.getInstance("MD5");
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+		}
+				
+		public void map(Text   key, Text value, Context context) 
+				throws IOException, InterruptedException {	
 
-		}		
-		public void map(Object key, Text value, Context context) 
-				throws IOException, InterruptedException{	
-			String[] column=value.toString().split("\t");			
-			md.update(column[2].getBytes());
+			
+			
+			String[] column=value.toString().split("\t");	
+			md.update(column[1].getBytes());
+			String key_string = key.toString();
 			byte[] bytedata=md.digest();
 			String str="";			
 			for (int i=0;i<bytedata.length;i++){
@@ -48,46 +82,43 @@ public class DocumentFilterMR {
 				//变量bytedata与0xff按位与运算，将高8位置0，强制转化为byte类型，转化16进制，加0x100是因为有的bytedata[i]的十六进制只有1位  
 			}
 			
-			if(hashMap.containsKey(column[0]) && hashMap.get(column[0])==str){
-				
+			if(hashMap.containsKey(key_string) && hashMap.get(key_string)==str){
+				context.getCounter("custom", "processed_crawler_data").increment(1);
 			} else {
-				context.write(new Text(column[0]),new Text(str));
-			}										
+				context.write(new Text(key_string),new Text(str));
+			}						
 		}			
 		
 	}
 	
 	public static void main(String[] args) 
 			throws IOException, ClassNotFoundException, InterruptedException{
+		
+			System.out.println("Start");
 
 			Configuration conf=new Configuration();
 			
-		      String[] libjarsArr = args[2].split(",");
-		        for (int i = 0; i < libjarsArr.length; ++i) {
-		        	addTmpJar(libjarsArr[i], conf);
-		        }
+			conf.set("HDFS_hashlist", args[0]);
+			
 	      	Job job = new Job(conf, "DocumentFilterMR");
 	    	job.setJarByClass(DocumentFilterMR.class);
-	    	job.setMapperClass(Mapper.class);
+	    	job.setMapperClass(MapperClass.class);
 	    	job.setNumReduceTasks(0);
+	    	job.setInputFormatClass(SequenceFileInputFormat.class); //need the specific read method
+	    	job.setMapOutputKeyClass(Text.class);
+			job.setMapOutputValueClass(Text.class);
+	    	//job.setInputFormatClass(SequenceFileAsTextInputFormat.class);
 	    	job.setOutputKeyClass(Text.class);
 	    	job.setOutputValueClass(Text.class);
 	    	
-	    	FileInputFormat.addInputPath(job, new Path(args[0]));
-	    	FileOutputFormat.setOutputPath(job, new Path(args[1]));
+	        FileSystem fs = FileSystem.get(conf);  
+//	        reader = new SequenceFile.Reader(fs, new Path(args[1]), conf);  
+	    	
+	    	FileInputFormat.addInputPath(job, new Path(args[1]));
+	    	FileOutputFormat.setOutputPath(job, new Path(args[2]));
+	    	System.exit(job.waitForCompletion(true) ? 0 : 1);
+	}
 
-	}
-	public static void addTmpJar(String jarPath, Configuration conf) throws IOException {
-		System.setProperty("path.separator", ":");
-		FileSystem fs = FileSystem.getLocal(conf);
-		String newJarPath = new Path(jarPath).makeQualified(fs).toString();
-		String tmpjars = conf.get("tmpjars");
-		if (tmpjars == null || tmpjars.length() == 0) {
-			conf.set("tmpjars", newJarPath);
-		} else {
-			conf.set("tmpjars", tmpjars + "," + newJarPath);
-		}
-	}
 
 }
 
