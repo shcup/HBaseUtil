@@ -32,8 +32,9 @@ public class HBaseHashInPut {
 			String[] columnVals=value.toString().split("\t");
 			String rowkey=columnVals[0];
 			Put put=new Put(rowkey.getBytes());
+			int idx = 0;
 			for(int i=1 ; i<columnVals.length ; i++){
-				put.add("info".getBytes(), column_name[i].getBytes(), columnVals[i].getBytes());
+				put.add("info".getBytes(), column_name[idx++].getBytes(), columnVals[i].getBytes());
 			}
 			context.write(new ImmutableBytesWritable(rowkey.getBytes()), put);
 		}			
@@ -65,6 +66,7 @@ public class HBaseHashInPut {
 			
 			job.setNumReduceTasks(0);
 			FileInputFormat.addInputPath(job, new Path(args[0]));
+			
 			System.out.println(job.waitForCompletion(true) ? 0 : 1);
 
 	}

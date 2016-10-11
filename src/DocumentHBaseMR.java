@@ -47,7 +47,7 @@ public class DocumentHBaseMR {
 	        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");  
 	        conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
 	        
-	        conf.set(TableOutputFormat.OUTPUT_TABLE, "IndiaTable");
+	        conf.set(TableOutputFormat.OUTPUT_TABLE, args[1]);
 			
 			
 			Job job =new Job(conf,"DocumentHBaseMR");
