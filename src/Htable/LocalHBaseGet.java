@@ -1,6 +1,7 @@
 package Htable;
 
 
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -30,13 +31,22 @@ public class LocalHBaseGet {
 		Get get = new Get(args[1].getBytes());  
 		Result rs = table.get(get);  
 		
+		FileWriter writer=new FileWriter(args[2],true);
+		
 	     for(KeyValue kv : rs.raw()){  
-	            System.out.print(new String(kv.getRow()) + " " );  
-	            System.out.print(new String(kv.getFamily()) + ":" );  
-	            System.out.print(new String(kv.getQualifier()) + " " );  
-	            System.out.print(kv.getTimestamp() + " " );  
-	            System.out.println(new String(kv.getValue()));  
+	    	 String s=new String(kv.getValue())+"\t";
+	 		writer.write(s);
+  
+//	            System.out.print(new String(kv.getRow()) + " " );  
+//	            System.out.print(new String(kv.getFamily()) + ":" );  
+//	            System.out.print(new String(kv.getQualifier()) + " " );  
+//	            System.out.print(kv.getTimestamp() + " " );  
+//	            System.out.println(new String(kv.getValue()));  
 	        }
+	     writer.write("\n");
+	 		if(writer != null){  
+                writer.close();     
+            }
 	}
 
 }
