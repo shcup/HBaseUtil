@@ -28,25 +28,32 @@ public class LocalHBaseGet {
 //      HTable table=new HTable(conf,"Localltable");        
         HTable table=new HTable(conf,args[0]);
         
-		Get get = new Get(args[1].getBytes());  
+		Get get = new Get(Bytes.toBytes(args[1]));  
+ 		if(get==null){
+			System.out.println("The media_doc_id does not exist");
+		}else{
 		Result rs = table.get(get);  
+		FileWriter writer=new FileWriter(args[2],true);	
 		
-		FileWriter writer=new FileWriter(args[2],true);
-		
-	     for(KeyValue kv : rs.raw()){  
-	    	 String s=new String(kv.getValue())+"\t";
-	 		writer.write(s);
+		byte[] value=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("context"));
+		byte[] value1=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("media_doc_id"));
+//	     for(KeyValue kv : rs.raw()){  
+//	    	 String s=new String(kv.getValue())+"\t";
+		String s=Bytes.toString(value);
+		String id=Bytes.toString(value1);
+	 		writer.write(id+"\t"+s);
   
 //	            System.out.print(new String(kv.getRow()) + " " );  
 //	            System.out.print(new String(kv.getFamily()) + ":" );  
 //	            System.out.print(new String(kv.getQualifier()) + " " );  
 //	            System.out.print(kv.getTimestamp() + " " );  
 //	            System.out.println(new String(kv.getValue()));  
-	        }
+//	        }
 	     writer.write("\n");
 	 		if(writer != null){  
                 writer.close();     
             }
+	}
 	}
 
 }
