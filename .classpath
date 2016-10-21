@@ -7,7 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="E:/NLPMR/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="E:/NLPMR/hadoop-common-2.6.0.jar" sourcepath="E:/NLPMR/hadoop-common-2.6.0.jar"/>
 	<classpathentry kind="lib" path="E:/NLPMR/HadoopCompositeDoc.jar" sourcepath="E:/NLPMR/libthrift-0.9.3.jar"/>
 	<classpathentry kind="lib" path="E:/NLPMR/hadoop-eclipse-plugin-2.6.0.jar"/>
 	<classpathentry kind="lib" path="E:/NLPMR/hadoop-hdfs-2.6.0.jar"/>
@@ -20,5 +19,6 @@
 	<classpathentry kind="lib" path="E:/jar/hbase-server-1.1.2.jar"/>
 	<classpathentry kind="lib" path="E:/jar/lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="E:/jar/DPMR.jar"/>
+	<classpathentry kind="lib" path="E:/jar/hadoop-common-2.6.4.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
