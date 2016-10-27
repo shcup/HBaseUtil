@@ -37,7 +37,7 @@ public class LocalHBaseGetConsole {
     		Get get = new Get(Bytes.toBytes(s));  
     		Result rs = table.get(get); 	
     		if (rs == null || rs.size() == 0) {
-    			System.out.println("Empty Key!");
+    			System.out.println(s + "\tEmpty Key!");
     			continue;
     		}
     		byte[] value=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("context"));
@@ -66,6 +66,11 @@ public class LocalHBaseGetConsole {
 		System.out.println("Is home\t" + compositeDoc.media_doc_info.is_home);
 		System.out.println("Source name:\t" + compositeDoc.source_name);
 		System.out.println("Source weight:\t" + compositeDoc.source_weight);
+		System.out.println("Title:\t" + compositeDoc.title);
+		System.out.println("Body:\t" + compositeDoc.main_text_list);
+		System.out.println("Thumbnail:\t" + compositeDoc.img_text_list);
+		System.out.println("Title words:\t" + compositeDoc.title_words);
+		System.out.println("Body words:\t" + compositeDoc.body_words);
 		System.out.println("Title NER\t" + compositeDoc.title_ner.toString());
 		System.out.println("Body Ner\t" + compositeDoc.body_ner.toString());
 		System.out.println("Title NP\t" + compositeDoc.title_np.toString());
