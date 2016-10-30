@@ -90,7 +90,7 @@ public class SentenceExtractor {
 			
 			StringBuilder sb = new StringBuilder();
 			for (String word : compositeDoc.title_words) {
-				if (!word.equals("\t")) {		
+				if (!word.equals("\t") && !word.equals(".")) {		
 					sb.append(word);
 					sb.append(' ');
 				} else {
@@ -106,7 +106,7 @@ public class SentenceExtractor {
 			}
 			if (compositeDoc.body_words != null) {
 				for (String word : compositeDoc.body_words) {
-					if (!word.equals("\t")) {		
+					if (!word.equals("\t") && !word.equals(".")) {		
 						sb.append(word);
 						sb.append(' ');
 					} else {
@@ -146,14 +146,14 @@ public class SentenceExtractor {
 			
 			StringBuilder sb = new StringBuilder();
 			for (String word : compositeDoc.title_words) {
-				if (!word.equals("\t")) {		
+				if (!word.equals("\t") && !word.equals(".")) {		
 					sb.append(word);
 					sb.append(' ');
 				}
 			}
 			if (compositeDoc.body_words != null) {
 				for (String word : compositeDoc.body_words) {
-					if (!word.equals("\t")) {		
+					if (!word.equals("\t") && !word.equals(".")) {		
 						sb.append(word);
 						sb.append(' ');
 					}
@@ -183,13 +183,13 @@ public class SentenceExtractor {
 
 		Job job=Job.getInstance(conf,SentenceExtractor.class.getSimpleName());
 		job.setJarByClass(SentenceExtractor.class);
-		job.setMapperClass(HBaseSentenceFromWordsExtractorMapper.class);
+		job.setMapperClass(HBaseArticleExtractorMapper.class);
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(Text.class);
 		
 		
 		job.setNumReduceTasks(0);
-		TableMapReduceUtil.initTableMapperJob(args[0],new Scan(),HBaseSentenceFromWordsExtractorMapper.class, Text.class,Text.class, job);
+		TableMapReduceUtil.initTableMapperJob(args[0],new Scan(),HBaseArticleExtractorMapper.class, Text.class,Text.class, job);
 		
 		job.setOutputFormatClass(TextOutputFormat.class);
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
