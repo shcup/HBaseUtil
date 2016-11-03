@@ -58,6 +58,12 @@ public class LocalHBaseGetConsole {
 		System.out.println("URL:\t" + compositeDoc.doc_url);
 		System.out.println("Domain:\t" + compositeDoc.media_doc_info.source);
 		System.out.println("Language type:\t" + compositeDoc.language_type.toString());
+		if (compositeDoc.writer != null) {
+			System.out.println("Author:\t" + compositeDoc.writer.toString());
+		}
+		if (compositeDoc.category_info != null) {
+			System.out.println("Category:\t" + compositeDoc.category_info.toString());
+		}
 		System.out.println("Show Time:\t" + compositeDoc.showtime);
 		System.out.println("Content timestamp\t" + compositeDoc.media_doc_info.content_timestamp);
 		System.out.println("Update timestamp\t" + compositeDoc.media_doc_info.update_timestamp);
