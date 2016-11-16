@@ -7,9 +7,12 @@ import java.util.Scanner;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Mapper.Context;
 
@@ -20,39 +23,45 @@ public class LocalHBaseGetConsole {
 
 	public static void main(String[] args) throws IOException {
 
-        Configuration conf = new Configuration();            
-        conf.set("conf.column", "info"); 
-    	conf.set("hbase.zookeeper.property.clientPort", "31818"); //Óëhbase/conf/hbase-site.xmlÖÐhbase.zookeeper.property.clientPortÅäÖÃµÄÖµÏàÍ¬ 
-        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");   
-        conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");//Óëhbase/conf/hbase-site.xmlÖÐhbase.zookeeper.quorumÅäÖÃµÄÖµÏàÍ¬
-        conf = HBaseConfiguration.create(conf);         
-        HTable table = new HTable(conf,args[0]); 
-        System.out.println("ÇëÊäÈëID:");
-    	Scanner scan=new Scanner(System.in);
-		while(scan.hasNext()){
-			String s=scan.nextLine();	
-			if (s.isEmpty()) {
-				continue;
+		Configuration conf = new Configuration();
+		conf.set("conf.column", "info");
+		conf.set("hbase.zookeeper.property.clientPort", "31818"); // ï¿½ï¿½hbase/conf/hbase-site.xmlï¿½ï¿½hbase.zookeeper.property.clientPortï¿½ï¿½ï¿½Ãµï¿½Öµï¿½ï¿½Í¬
+		conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");
+		conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");// ï¿½ï¿½hbase/conf/hbase-site.xmlï¿½ï¿½hbase.zookeeper.quorumï¿½ï¿½ï¿½Ãµï¿½Öµï¿½ï¿½Í¬
+		conf = HBaseConfiguration.create(conf);
+		Connection connection = ConnectionFactory.createConnection(conf);
+		Table table = connection.getTable(TableName.valueOf(args[0]));
+		System.out.println("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID:");
+		Scanner scan = new Scanner(System.in);
+		try {
+
+			while (scan.hasNext()) {
+				String s = scan.nextLine();
+				if (s.isEmpty()) {
+					continue;
+				}
+				Get get = new Get(Bytes.toBytes(s));
+				Result rs = table.get(get);
+				if (rs == null || rs.size() == 0) {
+					System.out.println(s + "\tEmpty Key!");
+					continue;
+				}
+				byte[] value = rs.getValue(Bytes.toBytes("info"), Bytes.toBytes("context"));
+				byte[] value1 = rs.getValue(Bytes.toBytes("info"), Bytes.toBytes("media_doc_id"));
+				String text = Bytes.toString(value);
+				List<String> bodylist = new ArrayList<String>();
+				Context context = null;
+				CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(text, context);
+				Print(compositeDoc);
 			}
-    		Get get = new Get(Bytes.toBytes(s));  
-    		Result rs = table.get(get); 	
-    		if (rs == null || rs.size() == 0) {
-    			System.out.println(s + "\tEmpty Key!");
-    			continue;
-    		}
-    		byte[] value=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("context"));
-    		byte[] value1=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("media_doc_id"));
-    		String text=Bytes.toString(value);	
-    		String title=null;
-    		List<String> bodylist=new ArrayList<String>();
-    		Context context=null;
-    		CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(text, context);
-    		Print(compositeDoc);
+		} finally {
+			scan.close();
+			table.close();
+			connection.close();
 		}
 
-	}	
-	
-	
+	}
+
 	public static void Print(CompositeDoc compositeDoc) {
 		System.out.println("title:\t" + compositeDoc.title);
 		System.out.println("URL:\t" + compositeDoc.doc_url);
@@ -98,9 +107,8 @@ public class LocalHBaseGetConsole {
 			out = compositeDoc.media_doc_info.classified_category_info.toString();
 		}
 		System.out.println("Classified category:\t" + out);
-		//System.out.println();
-		
-		
-		//System.out.println("body:\t"+compositeDoc.main_text_list.toString());
+		// System.out.println();
+
+		// System.out.println("body:\t"+compositeDoc.main_text_list.toString());
 	}
 }

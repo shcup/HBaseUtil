@@ -6,54 +6,52 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 
-import DocProcess.CompositeDocSerialize;
-import pipeline.CompositeDoc;
+public class LocalHBaseGet {
 
-public class LocalHBaseGet {      
-	
-	public static void main(String[] args) throws IOException{	
-		
-        Configuration conf = new Configuration();            
-        conf.set("conf.column", "info"); 
-        
-    	conf.set("hbase.zookeeper.property.clientPort", "31818"); //Óëhbase/conf/hbase-site.xmlÖÐhbase.zookeeper.property.clientPortÅäÖÃµÄÖµÏàÍ¬ 
-        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");   
-        conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");//Óëhbase/conf/hbase-site.xmlÖÐhbase.zookeeper.quorumÅäÖÃµÄÖµÏàÍ¬
-        conf = HBaseConfiguration.create(conf);         
-        HTable table = new HTable(conf,args[0]); 
-        
-        File f = new File(args[1]); //Read file 
-        FileWriter writer = new FileWriter(args[2],true);//write result
-    	BufferedReader br1=new BufferedReader (new InputStreamReader(new FileInputStream(f)));
-    	
-        String ID = null;
-    	while ((ID = br1.readLine()) != null){
-    		Get get = new Get(Bytes.toBytes(ID));  
-    		Result rs = table.get(get); 	
-    		byte[] value=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("context"));
-    		byte[] value1=rs.getValue(Bytes.toBytes("info"),Bytes.toBytes("media_doc_id"));
-    		String text=Bytes.toString(value1)+"\t"+Bytes.toString(value);
-    		writer.write(text+"\n"); 
-    		}
-    	
-    	if(writer != null){
-    		writer.close();
-    		}
+	public static void main(String[] args) throws IOException {
+
+		Configuration conf = new Configuration();
+		conf.set("conf.column", "info");
+
+		conf.set("hbase.zookeeper.property.clientPort", "31818"); // ï¿½ï¿½hbase/conf/hbase-site.xmlï¿½ï¿½hbase.zookeeper.property.clientPortï¿½ï¿½ï¿½Ãµï¿½Öµï¿½ï¿½Í¬
+		conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");
+		conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");// ï¿½ï¿½hbase/conf/hbase-site.xmlï¿½ï¿½hbase.zookeeper.quorumï¿½ï¿½ï¿½Ãµï¿½Öµï¿½ï¿½Í¬
+		conf = HBaseConfiguration.create(conf);
+		Connection connection = ConnectionFactory.createConnection(conf);
+		Table table = connection.getTable(TableName.valueOf(args[0]));
+		try {
+			// Use the table as needed, for a single operation and a single
+			// thread
+			File f = new File(args[1]); // Read file
+			try (FileWriter writer = new FileWriter(args[2], true); // write result
+																	
+					BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream(f)))) {
+				String ID = null;
+				while ((ID = br1.readLine()) != null) {
+					Get get = new Get(Bytes.toBytes(ID));
+					Result rs = table.get(get);
+					byte[] value = rs.getValue(Bytes.toBytes("info"), Bytes.toBytes("context"));
+					byte[] value1 = rs.getValue(Bytes.toBytes("info"), Bytes.toBytes("media_doc_id"));
+					String text = Bytes.toString(value1) + "\t" + Bytes.toString(value);
+					writer.write(text + "\n");
+				}
+			}
+
+		} finally {
+			table.close();
+			connection.close();
+		}
+
 	}
 }

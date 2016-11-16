@@ -1,14 +1,13 @@
 package ExperimentDataExtract;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -17,12 +16,10 @@ import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.mapreduce.TableMapper;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import DocProcess.CompositeDocSerialize;
-
 import pipeline.CompositeDoc;
 
 public class SentenceExtractor {
@@ -38,14 +35,13 @@ public class SentenceExtractor {
 			byte[] text=null;
 			
 			
-			media_doc_id=value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()).getValue();
-			text=value.getColumnLatestCell("info".getBytes(),"context".getBytes()).getValue();
+			media_doc_id = CellUtil.cloneValue(value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()));
+			text = CellUtil.cloneValue(value.getColumnLatestCell("info".getBytes(),"context".getBytes()));
 			
 			outKey.set(key.get());
 			
 			String temp=(text == null || text.length==0)?"Null":new String(text);		
 
-			List<String> res = new ArrayList<String>();
 			CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(temp, context);	
 			outKey.set(compositeDoc.title);
 			context.write(outKey, outValue);
@@ -76,14 +72,13 @@ public class SentenceExtractor {
 			byte[] text=null;
 			
 			
-			media_doc_id=value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()).getValue();
-			text=value.getColumnLatestCell("info".getBytes(),"context".getBytes()).getValue();
+			media_doc_id = CellUtil.cloneValue(value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()));
+			text = CellUtil.cloneValue(value.getColumnLatestCell("info".getBytes(),"context".getBytes()));
 			
 			outKey.set(key.get());
 			
 			String temp=(text == null || text.length==0)?"Null":new String(text);		
 
-			List<String> res = new ArrayList<String>();
 			CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(temp, context);	
 			
 			
@@ -134,8 +129,8 @@ public class SentenceExtractor {
 			byte[] text=null;
 			
 			
-			media_doc_id=value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()).getValue();
-			text=value.getColumnLatestCell("info".getBytes(),"context".getBytes()).getValue();
+			media_doc_id = CellUtil.cloneValue(value.getColumnLatestCell("info".getBytes(),"media_doc_id".getBytes()));
+			text = CellUtil.cloneValue(value.getColumnLatestCell("info".getBytes(),"context".getBytes()));
 			
 			outKey.set(key.get());
 			

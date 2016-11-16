@@ -1,35 +1,40 @@
 package Htable;
 
-
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
-public class LocalHBasePut {      
-	
-	public static void main(String[] args) throws IOException {
-        Configuration conf = new Configuration();  
-        //Óëhbase/conf/hbase-site.xmlÖÐhbase.zookeeper.quorumÅäÖÃµÄÖµÏàÍ¬   
-        conf.set("conf.column", "info"); 
-        //Óëhbase/conf/hbase-site.xmlÖÐhbase.zookeeper.property.clientPortÅäÖÃµÄÖµÏàÍ¬ 
-    	conf.set("hbase.zookeeper.property.clientPort", "31818");
-        conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");   
-        conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
-        conf = HBaseConfiguration.create(conf); 
+public class LocalHBasePut {
 
-//      HTable table=new HTable(conf,"Localltable");        
-        HTable table=new HTable(conf,args[0]);
-        
-		byte[] row = Bytes.toBytes(args[1]);
-		Put put = new Put(row);
-		put.add(Bytes.toBytes("info"),Bytes.toBytes("MediaDocId"),Bytes.toBytes(args[2]));
-		put.add(Bytes.toBytes("info"),Bytes.toBytes("context"),Bytes.toBytes(args[3]));
+	public static void main(String[] args) throws IOException {
+		Configuration conf = new Configuration();
+		// ï¿½ï¿½hbase/conf/hbase-site.xmlï¿½ï¿½hbase.zookeeper.quorumï¿½ï¿½ï¿½Ãµï¿½Öµï¿½ï¿½Í¬
+		conf.set("conf.column", "info");
+		// ï¿½ï¿½hbase/conf/hbase-site.xmlï¿½ï¿½hbase.zookeeper.property.clientPortï¿½ï¿½ï¿½Ãµï¿½Öµï¿½ï¿½Í¬
+		conf.set("hbase.zookeeper.property.clientPort", "31818");
+		conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");
+		conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
+		conf = HBaseConfiguration.create(conf);	
+		Connection connection = ConnectionFactory.createConnection(conf);
+		Table table = connection.getTable(TableName.valueOf(args[0]));
+		try {
+			byte[] row = Bytes.toBytes(args[1]);
+			Put put = new Put(row);
+			put.addColumn(Bytes.toBytes("info"), Bytes.toBytes("MediaDocId"), Bytes.toBytes(args[2]));
+			put.addColumn(Bytes.toBytes("info"), Bytes.toBytes("context"), Bytes.toBytes(args[3]));
 			table.put(put);
-			table.flushCommits();
+
+		} finally {
+			table.close();
+			connection.close();
+		}
 	}
 
 }

@@ -1,37 +1,20 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
-import javax.sound.midi.Sequence;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileAsTextInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.ReflectionUtils;
-
-//import org.apache.hcatalog.rcfile.RCFileMapReduceInputFormat;
-//import org.apache.hive.hcatalog.rcfile.RCFileMapReduceInputFormat;
-
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 
 public class DocumentFilterMR {
     private static SequenceFile.Reader reader = null;  
@@ -79,7 +62,7 @@ public class DocumentFilterMR {
 			String str="";			
 			for (int i=0;i<bytedata.length;i++){
 				str += Integer.toString((bytedata[i] & 0xff) +0x100,16).substring(1);
-				//±äÁ¿bytedataÓë0xff°´Î»ÓëÔËËã£¬½«¸ß8Î»ÖÃ0£¬Ç¿ÖÆ×ª»¯ÎªbyteÀàÐÍ£¬×ª»¯16½øÖÆ£¬¼Ó0x100ÊÇÒòÎªÓÐµÄbytedata[i]µÄÊ®Áù½øÖÆÖ»ÓÐ1Î»  
+				//ï¿½ï¿½ï¿½ï¿½bytedataï¿½ï¿½0xffï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½8Î»ï¿½ï¿½0ï¿½ï¿½Ç¿ï¿½ï¿½×ªï¿½ï¿½Îªbyteï¿½ï¿½ï¿½Í£ï¿½×ªï¿½ï¿½16ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½0x100ï¿½ï¿½ï¿½ï¿½Îªï¿½Ðµï¿½bytedata[i]ï¿½ï¿½Ê®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½1Î»  
 			}
 			
 			if(hashMap.containsKey(key_string) && hashMap.get(key_string)==str){
