@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-common-2.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/HadoopCompositeDoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-hdfs-2.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-mapreduce-client-common-2.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-mapreduce-client-core-2.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-yarn-common-2.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hbase-client-1.1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hbase-common-1.1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hbase-server-1.1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/commons-logging-1.2.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/DPMR.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>
