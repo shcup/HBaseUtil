@@ -136,7 +136,6 @@ public class SentenceExtractor {
 			
 			String temp=(text == null || text.length==0)?"Null":new String(text);		
 
-			List<String> res = new ArrayList<String>();
 			CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(temp, context);	
 			
 			StringBuilder sb = new StringBuilder();
@@ -196,7 +195,8 @@ public class SentenceExtractor {
 	public static void addTmpJar(String jarPath, Configuration conf) throws IOException {
 		System.setProperty("path.separator", ":");
 		FileSystem fs = FileSystem.getLocal(conf);
-		String newJarPath = new Path(jarPath).makeQualified(fs).toString();
+		//String newJarPath = new Path(jarPath).makeQualified(fs).toString();
+		String newJarPath = fs.makeQualified(new Path(jarPath)).toString();
 		String tmpjars = conf.get("tmpjars");
 		if (tmpjars == null || tmpjars.length() == 0) {
 			conf.set("tmpjars", newJarPath);
