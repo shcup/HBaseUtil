@@ -54,7 +54,7 @@ public class HBaseHashInPut {
 	        conf.set("column_name", args[2]);
 	        
 	        conf.set(TableOutputFormat.OUTPUT_TABLE, args[1]);					
-			Job job =new Job(conf,"HBaseHashInPut");
+			Job job = Job.getInstance(conf,"HBaseHashInPut");
 			TableMapReduceUtil.addDependencyJars(job);		
 					
 			job.setJarByClass(HBaseHashInPut.class);		

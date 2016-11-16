@@ -83,7 +83,7 @@ public class DocumentFilterMR {
 			
 			conf.set("HDFS_hashlist", args[0]);
 			
-	      	Job job = new Job(conf, "DocumentFilterMR");
+	      	Job job = Job.getInstance(conf, "DocumentFilterMR");
 	    	job.setJarByClass(DocumentFilterMR.class);
 	    	job.setMapperClass(MapperClass.class);
 	    	job.setNumReduceTasks(0);

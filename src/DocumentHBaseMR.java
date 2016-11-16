@@ -26,7 +26,7 @@ public class DocumentHBaseMR {
 			String rowkey=columnVals[0];
 			Put put=new Put(rowkey.getBytes());
 			for(int i=0;i<columnVals.length;i++){
-				put.add("info".getBytes(),columns[i].getBytes(),columnVals[i].getBytes());
+				put.addColumn("info".getBytes(),columns[i].getBytes(),columnVals[i].getBytes());
 			}
 			context.write(new ImmutableBytesWritable(rowkey.getBytes()), put);
 		}			
@@ -47,7 +47,7 @@ public class DocumentHBaseMR {
 	        conf.set(TableOutputFormat.OUTPUT_TABLE, args[1]);
 			
 			
-			Job job =new Job(conf,"DocumentHBaseMR");
+			Job job = Job.getInstance(conf,"DocumentHBaseMR");
 			TableMapReduceUtil.addDependencyJars(job);		
 					
 			job.setJarByClass(DocumentHBaseMR.class);		
