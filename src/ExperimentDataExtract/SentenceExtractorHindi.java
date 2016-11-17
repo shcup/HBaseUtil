@@ -215,11 +215,13 @@ public class SentenceExtractorHindi {
         conf.set("hbase.rootdir", "hdfs://in-cluster/hbase");   
         conf.set("hbase.zookeeper.quorum", "in-cluster-namenode1,in-cluster-namenode2,in-cluster-logserver");
 
-        
-        String[] libjarsArr = args[2].split(",");
-        for (int i = 0; i < libjarsArr.length; ++i) {
-        	addTmpJar(libjarsArr[i], conf);
+        if(args.length > 2){
+        	String[] libjarsArr = args[2].split(",");
+            for (int i = 0; i < libjarsArr.length; ++i) {
+            	addTmpJar(libjarsArr[i], conf);
+            }
         }
+        
 
 		Job job=Job.getInstance(conf,SentenceExtractorHindi.class.getSimpleName());
 		job.setJarByClass(SentenceExtractorHindi.class);
