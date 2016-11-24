@@ -6,16 +6,19 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-common-2.6.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/HadoopCompositeDoc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-hdfs-2.6.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-mapreduce-client-common-2.6.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-mapreduce-client-core-2.6.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hadoop-yarn-common-2.6.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hbase-client-1.1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hbase-common-1.1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/hbase-server-1.1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/commons-logging-1.2.1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/chandrakant/Desktop/jars/DPMR.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/DPMR.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hadoop-common-2.6.4.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/HadoopCompositeDoc.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hadoop-hdfs-2.5.1.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hadoop-mapreduce-client-common-2.5.1.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hadoop-mapreduce-client-core-2.5.1.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hadoop-yarn-common-2.5.1.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hbase-client-1.1.2.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hbase-common-1.1.2.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/hbase-server-1.1.2.jar"/>
+	<classpathentry kind="lib" path="E:/NLP/libthrift-0.9.3.jar"/>
+	<classpathentry kind="src" path="/DocumentProcessPipelineMRnew"/>
+	<classpathentry kind="src" path="/DocumentProcessPipelineMR"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
