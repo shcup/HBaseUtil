@@ -68,7 +68,7 @@ public class ClassficationModelTrainingDataExtraction
         inputAdapter = new ClassifierOriginalWithCrawlerFeatureAdapter();
       }
       String res = inputAdapter.GetInputText(compositeDoc);
-     outKey.set(compositeDoc.doc_url);
+      outKey.set(compositeDoc.doc_url);
       String label;
       HashSet<String> hash = new HashSet<String>();
       if ((compositeDoc.media_doc_info.normalized_category_info != null) && 
@@ -80,14 +80,8 @@ public class ClassficationModelTrainingDataExtraction
         }
         
         for(String word:hash){
-//        	for (int i = 0; i < compositeDoc.media_doc_info.normalized_category_info.category_item.size(); i++){
       	  sb.append(word).append(",");
-//          if (compositeDoc.media_doc_info.normalized_category_info.category_item.size() - 1 != i) {
-//              sb.append(",");
-//            }
-//        }
-        	}
-//        sb.append(compositeDoc.media_doc_info.normalized_category_info.category_item.get(i).category_path.get(category_level));
+        }
 
         label=sb.toString();
       } else {
@@ -95,8 +89,6 @@ public class ClassficationModelTrainingDataExtraction
       }
 
       context.write(outKey, new Text(compositeDoc.media_doc_info.id + "\t" + label + "\t" + res));
-
-      context.write(outKey, outValue);
     }
   }
   public static void main(String[] args)
