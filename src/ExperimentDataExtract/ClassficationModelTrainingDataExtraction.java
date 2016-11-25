@@ -3,6 +3,7 @@ package ExperimentDataExtract;
 import DocProcess.CompositeDocSerialize;
 import DocProcessClassification.DataAdapter.*;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -28,18 +29,6 @@ public class ClassficationModelTrainingDataExtraction
 {
  
 
-  public static void addTmpJar(String jarPath, Configuration conf) throws IOException
-  {
-    System.setProperty("path.separator", ":");
-    FileSystem fs = FileSystem.getLocal(conf);
-    String newJarPath = new Path(jarPath).makeQualified(fs).toString();
-    String tmpjars = conf.get("tmpjars");
-    if ((tmpjars == null) || (tmpjars.length() == 0))
-      conf.set("tmpjars", newJarPath);
-    else
-      conf.set("tmpjars", tmpjars + "," + newJarPath);
-  }
-
   public static class HBaseClassificationModelTrainingDataExtractorMapper extends TableMapper<Text, Text>
   {
     private Text outKey = new Text();
@@ -62,36 +51,45 @@ public class ClassficationModelTrainingDataExtraction
       media_doc_id = value.getColumnLatestCell("info".getBytes(), "media_doc_id".getBytes()).getValue();
       text = value.getColumnLatestCell("info".getBytes(), "context".getBytes()).getValue();
 
-      this.outKey.set(key.get());
+      outKey.set(key.get());
 
       String temp = (text == null) || (text.length == 0) ? "Null" : new String(text);
 
       CompositeDoc compositeDoc = CompositeDocSerialize.DeSerialize(temp, context);
 
       ClassifierInputTarget inputAdapter = null;
-      if (adapter_name == "ClassifierNormalizedFeatureAdapter")
+      if (adapter_name.equals("ClassifierNormalizedFeatureAdapter"))
         inputAdapter = new ClassifierNormalizedFeatureAdapter();
-      else if (adapter_name == "ClassifierNormalizedRichFeatureAdapter")
+      else if (adapter_name.equals("ClassifierNormalizedRichFeatureAdapter"))
         inputAdapter = new ClassifierNormalizedRichFeatureAdapter();
-      else if (adapter_name == "ClassifierOriginalFeatureAdapter")
+      else if (adapter_name.equals("ClassifierOriginalFeatureAdapter"))
         inputAdapter = new ClassifierOriginalFeatureAdapter();
-      else if (adapter_name == "ClassifierOriginalWithCrawlerFeatureAdapter") {
+      else if (adapter_name.equals("ClassifierOriginalWithCrawlerFeatureAdapter")) {
         inputAdapter = new ClassifierOriginalWithCrawlerFeatureAdapter();
       }
       String res = inputAdapter.GetInputText(compositeDoc);
-      this.outKey.set(compositeDoc.doc_url);
+     outKey.set(compositeDoc.doc_url);
       String label;
+      HashSet<String> hash = new HashSet<String>();
       if ((compositeDoc.media_doc_info.normalized_category_info != null) && 
         (compositeDoc.media_doc_info.normalized_category_info.category_item != null) && 
         (compositeDoc.media_doc_info.normalized_category_info.category_item.size() != 0)) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < compositeDoc.media_doc_info.normalized_category_info.category_item.size(); i++) {
-          sb.append(compositeDoc.media_doc_info.normalized_category_info.category_item.get(category_level));
-          if (compositeDoc.media_doc_info.normalized_category_info.category_item.size() - 1 != i) {
-            sb.append(",");
-          }
+          hash.add(compositeDoc.media_doc_info.normalized_category_info.category_item.get(i).category_path.get(category_level));
         }
-        label = sb.toString();
+        
+        for(String word:hash){
+//        	for (int i = 0; i < compositeDoc.media_doc_info.normalized_category_info.category_item.size(); i++){
+      	  sb.append(word).append(",");
+//          if (compositeDoc.media_doc_info.normalized_category_info.category_item.size() - 1 != i) {
+//              sb.append(",");
+//            }
+//        }
+        	}
+//        sb.append(compositeDoc.media_doc_info.normalized_category_info.category_item.get(i).category_path.get(category_level));
+
+        label=sb.toString();
       } else {
         label = "NoMatch";
       }
@@ -131,4 +129,17 @@ public class ClassficationModelTrainingDataExtraction
 
 		    job.waitForCompletion(true);
 		  }
+
+  public static void addTmpJar(String jarPath, Configuration conf) throws IOException
+  {
+    System.setProperty("path.separator", ":");
+    FileSystem fs = FileSystem.getLocal(conf);
+    String newJarPath = new Path(jarPath).makeQualified(fs).toString();
+    String tmpjars = conf.get("tmpjars");
+    if ((tmpjars == null) || (tmpjars.length() == 0))
+      conf.set("tmpjars", newJarPath);
+    else
+      conf.set("tmpjars", tmpjars + "," + newJarPath);
+  }
+
 }
